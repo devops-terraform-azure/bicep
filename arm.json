@@ -1,0 +1,44 @@
+{
+    "apiVersion": "2015-08-01",
+    "name": "[variables('webSiteName')]",
+    "type": "Microsoft.Web/sites",
+    "location": "[resourceGroup().location]",
+    "tags": {
+      "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]": "Resource",
+      "displayName": "Website"
+    },
+    "dependsOn": [
+      "[resourceId('Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]"
+    ],
+    "properties": {
+      "name": "[variables('webSiteName')]",
+      "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]"
+    },
+    "resources": [
+      {
+        "apiVersion": "2016-08-01",
+        "name": "appsettings",
+        "type": "config",
+        "dependsOn": [
+          "[resourceId('Microsoft.Web/Sites', variables('webSiteName'))]"
+        ],
+        "properties": {
+          "appdynamics.controller.hostName": "mycompany.saas.appdynamics.com",
+          "appdynamics.controller.port": "443",
+          "appdynamics.controller.ssl.enabled": "true",
+          "appdynamics.agent.accountName": "mycompany",
+          "appdynamics.agent.accountAccessKey": "[parameters('AppDAccessKeyInKeyVault')]",
+          "appdynamics.agent.applicationName": "HelloWorldSecureAppDKey",
+          "appdynamics.agent.tierName": "TestTier",
+          "appdynamics.agent.nodeName": "TestNode"
+        }
+      },
+      {
+        "apiVersion": "2015-08-01",
+        "name": "AppDynamics.WindowsAzure.SiteExtension.4.5.Release",
+        "type": "siteextensions",
+        "dependsOn": [
+          "[resourceId('Microsoft.Web/Sites', variables('webSiteName'))]"
+        ]
+      },
+    ]

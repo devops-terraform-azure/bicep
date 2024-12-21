@@ -32,20 +32,27 @@ resource appService 'Microsoft.Web/sites@2021-02-01' = {
   }
 }
 
-resource symbolicname 'Microsoft.Web/sites/siteextensions@2024-04-01' = {
-  parent: appService
-  name: 'AppDynamics.WindowsAzure.SiteExtension.4.5.Release'
-}
-
 resource appSettings 'Microsoft.Web/sites/config@2021-02-01' = {
   parent: appService
   name: 'appsettings'
   properties: {
+    // Required AppDynamics settings
     'appdynamics.controller.hostName': controllerHostName
     'appdynamics.controller.port': controllerPort
     'appdynamics.controller.ssl.enabled': sslEnabled
-    'appdynamics.agent.accountName': accountName
+    'appdynamics.agent.accountName': accountName 
     'appdynamics.agent.accountAccessKey': accountAccessKey
-    'appdynamics.agent.applicationName': 'contactServiceName' // Assuming 'contactServiceName' is a defined variable
+    // Optional but recommended settings
+    'appdynamics.controller.applicationName': appServiceName
+    'appdynamics.agent.tierName': appServiceName
+    'appdynamics.agent.nodeName': '${appServiceName}-${resourceGroup().name}'
   }
+}
+
+resource appDynamicsExtension 'Microsoft.Web/sites/siteextensions@2024-04-01' = {
+  parent: appService
+  name: 'AppDynamics.WindowsAzure.SiteExtension.4.5.Release'
+  dependsOn: [
+    appSettings
+  ]
 }
