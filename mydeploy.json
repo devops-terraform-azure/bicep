@@ -1,0 +1,68 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.32.4.45862",
+      "templateHash": "16165053964895543694"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]"
+    },
+    "appServicePlanName": {
+      "type": "string",
+      "defaultValue": "myAppServicebicep001Plan"
+    },
+    "appServiceName": {
+      "type": "string",
+      "defaultValue": "myAppService-bicep001"
+    },
+    "appServiceSku": {
+      "type": "string",
+      "defaultValue": "P1v2"
+    },
+    "extensionName": {
+      "type": "string",
+      "defaultValue": "NewRelic.Azure.WebSites.Extension"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2021-02-01",
+      "name": "[parameters('appServicePlanName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[parameters('appServiceSku')]",
+        "tier": "PremiumV2",
+        "size": "P1v2",
+        "capacity": 1
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2021-02-01",
+      "name": "[parameters('appServiceName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/sites/extensions",
+      "apiVersion": "2021-02-01",
+      "name": "[format('{0}/{1}', parameters('appServiceName'), 'MSDeploy')]",
+      "properties": {},
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('appServiceName'))]"
+      ]
+    }
+  ]
+}
